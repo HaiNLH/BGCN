@@ -51,6 +51,7 @@ class BasicDataset(Dataset):
         self.task = task
         self.neg_sample = neg_sample
         self.num_users, self.num_bundles, self.num_items  = self.__load_data_size()
+        print(self.num_users, self.num_bundles, self.num_items)
 
     def __getitem__(self, index):
         raise NotImplementedError
@@ -61,6 +62,7 @@ class BasicDataset(Dataset):
     def __load_data_size(self):
         with open(os.path.join(self.path, self.name, '{}_data_size.txt'.format(self.name)), 'r') as f:
             return [int(s) for s in f.readline().split('\t')][:3]
+        
     def load_U_B_interaction(self):
         with open(os.path.join(self.path, self.name, 'user_bundle_{}.csv'.format(self.task)), 'r', newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
