@@ -9,7 +9,7 @@ CONFIG = {
     'gpu_id': "0",
     'note': 'some_note',
     'model': 'BGCN',
-    'dataset_name': 'clothing',
+    'dataset_name': 'electronic',
     'task': 'tune',
     'eval_task': 'test',
 
@@ -21,25 +21,25 @@ CONFIG = {
 
     ## optimal hyperparameters 
     'lrs': [1e-3],
-    'message_dropouts': [0],
+    'message_dropouts': [0.1],
     'node_dropouts': [0],
-    'decays': [1e-4],
+    'decays': [1e-3],
 
     ## hard negative sample and further train
     'sample': 'simple',
     #  'sample': 'hard',
     'hard_window': [0.7, 1.0], # top 30%
     'hard_prob': [0.4, 0.4], # probability 0.8
-    'conti_train': 'model_file_from_simple_sample.pth',
+    'conti_train': '/content/BGCN/BGCN/log/clothing/BGCN_tune/11-05-07-05-37-some_note/model.csv',
 
     ## other settings
     'epochs': 1000,
     'early': 50,
     'log_interval': 20,
-    'test_interval': 1,
+    'test_interval': 5,
     'retry': 1,
 
     ## test path
-    'test':['model_path_from_hard_sample']
+    'test':['/content/BGCN/BGCN/log/clothing/BGCN_tune/11-05-07-05-37-some_note/']
 }
 

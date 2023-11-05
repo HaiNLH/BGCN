@@ -26,7 +26,9 @@ def main():
     #  set env
     setproctitle.setproctitle(f"train{CONFIG['name']}")
     os.environ["CUDA_VISIBLE_DEVICES"] = CONFIG['gpu_id']
-    device = torch.device('cuda')
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(device)
+   
 
     #  fix seed
     seed = 123
@@ -58,8 +60,8 @@ def main():
     bi_graph = assist_data.ground_truth_b_i
 
     #  metric
-    metrics = [Recall(20), NDCG(20), Recall(40), NDCG(40), Recall(80), NDCG(80)]
-    TARGET = 'Recall@20'
+    metrics = [Recall(10),NDCG(10),Recall(20), NDCG(20), Recall(40), NDCG(40), Recall(80), NDCG(80)]
+    TARGET = 'Recall@10'
 
     #  loss
     loss_func = loss.BPRLoss('mean')
@@ -109,44 +111,46 @@ def main():
         while retry >= 0:
             # log
             log.update_modelinfo(info, env, metrics)
-            try:
+            # try:
                 # train & test
-                early = CONFIG['early']  
-                train_writer = SummaryWriter(log_dir=visual_path, comment='train')
-                test_writer = SummaryWriter(log_dir=visual_path, comment='test') 
-                for epoch in range(CONFIG['epochs']):
-                    # train
-                    trainloss = train(model, epoch+1, train_loader, op, device, CONFIG, loss_func)
-                    train_writer.add_scalars('loss/single', {"loss": trainloss}, epoch)
+            early = CONFIG['early']  
+            train_writer = SummaryWriter(log_dir=visual_path, comment='train')
+            test_writer = SummaryWriter(log_dir=visual_path, comment='test') 
+            for epoch in range(CONFIG['epochs']):
+                # train
+                trainloss = train(model, epoch+1, train_loader, op, device, CONFIG, loss_func)
+                train_writer.add_scalars('loss/single', {"loss": trainloss}, epoch)
 
-                    # test
-                    if epoch % CONFIG['test_interval'] == 0:  
-                        output_metrics = test(model, test_loader, device, CONFIG, metrics)
+                # test
+                if epoch % CONFIG['test_interval'] == 0:  
+                    output_metrics = test(model, test_loader, device, CONFIG, metrics)
 
-                        for metric in output_metrics:
-                            test_writer.add_scalars('metric/all', {metric.get_title(): metric.metric}, epoch)
-                            if metric==output_metrics[0]:
-                                test_writer.add_scalars('metric/single', {metric.get_title(): metric.metric}, epoch)
+                    for metric in output_metrics:
+                        test_writer.add_scalars('metric/all', {metric.get_title(): metric.metric}, epoch)
+                        if metric==output_metrics[0]:
+                            test_writer.add_scalars('metric/single', {metric.get_title(): metric.metric}, epoch)
 
-                        # log
-                        log.update_log(metrics, model) 
+                    # log
+                    log.update_log(metrics, model) 
 
-                        # check overfitting
-                        if epoch > 10:
-                            if check_overfitting(log.metrics_log, TARGET, 1, show=False):
-                                break
-                        # early stop
-                        early = early_stop(
-                            log.metrics_log[TARGET], early, threshold=0)
-                        if early <= 0:
+                    # check overfitting
+                    if epoch > 10:
+                        if check_overfitting(log.metrics_log, TARGET, 1, show=False):
                             break
-                train_writer.close()
-                test_writer.close()
+                    # early stop
+                    early = early_stop(
+                        log.metrics_log[TARGET], early, threshold=0)
+                    if early <= 0:
+                        break
+            train_writer.close()
+            test_writer.close()
 
-                log.close_log(TARGET)
-                retry = -1
-            except RuntimeError:
-                retry -= 1
+            log.close_log(TARGET)
+            retry = -1
+            # except Exception as e:
+            #     error_name = type(e).__name__
+            #     print(f"Caught an error of type: {error_name}")
+            #     retry -= 1
     log.close()
 
 
