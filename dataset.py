@@ -4,7 +4,6 @@
 import os
 import torch
 import numpy as np
-import csv
 import scipy.sparse as sp 
 from torch.utils.data import Dataset
 from config import CONFIG
@@ -51,7 +50,6 @@ class BasicDataset(Dataset):
         self.task = task
         self.neg_sample = neg_sample
         self.num_users, self.num_bundles, self.num_items  = self.__load_data_size()
-        print(self.num_users, self.num_bundles, self.num_items)
 
     def __getitem__(self, index):
         raise NotImplementedError
@@ -62,22 +60,15 @@ class BasicDataset(Dataset):
     def __load_data_size(self):
         with open(os.path.join(self.path, self.name, '{}_data_size.txt'.format(self.name)), 'r') as f:
             return [int(s) for s in f.readline().split('\t')][:3]
-        
     def load_U_B_interaction(self):
-        with open(os.path.join(self.path, self.name, 'user_bundle_{}.csv'.format(self.task)), 'r', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            next(reader, None)
-            return list(map(lambda row: (int(row[0]), int(row[1])), reader))
+        with open(os.path.join(self.path, self.name, 'user_bundle_{}.txt'.format(self.task)), 'r') as f:
+            return list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
     def load_U_I_interaction(self):
-        with open(os.path.join(self.path, self.name, 'user_item.csv'), 'r', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            next(reader, None)
-            return list(map(lambda row: (int(row[0]), int(row[1])), reader))
+        with open(os.path.join(self.path, self.name, 'user_item.txt'), 'r') as f:
+            return list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
     def load_B_I_affiliation(self):
-        with open(os.path.join(self.path, self.name, 'bundle_item.csv'), 'r', newline='') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            next(reader, None)
-            return list(map(lambda row: (int(row[0]), int(row[1])), reader))
+        with open(os.path.join(self.path, self.name, 'bundle_item.txt'), 'r') as f:
+            return list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
 
 
 class BundleTrainDataset(BasicDataset):
@@ -227,4 +218,3 @@ def get_dataset(path, name, task='tune', seed=123):
     print('finish loading bundle test data')
 
     return bundle_train_data, bundle_test_data, item_data, assist_data
-
