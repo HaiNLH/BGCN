@@ -40,7 +40,7 @@ def main():
     # metric
     metrics = [Recall(1),NDCG(1),Recall(3),NDCG(3),Recall(5),NDCG(5),Recall(10),NDCG(10),Recall(20), NDCG(20)]
     TARGET = 'NDCG@1'
-
+      
     # log
     log = logger.Logger(os.path.join(
         CONFIG['log'], CONFIG['dataset_name'], 
