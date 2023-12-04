@@ -13,7 +13,7 @@ import dataset
 from model import BGCN, BGCN_Info
 from utils import check_overfitting, early_stop, logger
 from train import train
-from metric import Recall, NDCG, MRR
+from metric import Recall, NDCG, MRR, Precision
 from config import CONFIG
 from test import test
 import loss
@@ -60,8 +60,8 @@ def main():
     bi_graph = assist_data.ground_truth_b_i
 
     #  metric
-    metrics = [Recall(1),NDCG(1),Recall(3),NDCG(3),Recall(5),NDCG(5),Recall(10),NDCG(10),Recall(20), NDCG(20)]
-    TARGET = 'NDCG@1'
+    metrics = [Recall(1),NDCG(1),Precision(1),Recall(3),NDCG(3),Precision(3),Recall(5),NDCG(5),Precision(5),Recall(10),NDCG(10),Precision(10),Recall(20), NDCG(20),Precision(20)]
+    TARGET = 'Recall@3'
 
     #  loss
     loss_func = loss.BPRLoss('mean')
