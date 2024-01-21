@@ -79,27 +79,6 @@ class Recall(_Metric):
         self._cnt += scores.shape[0] - (num_pos == 0).sum().item()
         self._sum += (is_hit/(num_pos+self.epison)).sum().item()
 
-class Precision(_Metric):
-    '''
-    Recall in top-k samples
-    '''
-
-    def __init__(self, topk):
-        super().__init__()
-        self.topk = topk
-        self.epison = 1e-8
-
-    def get_title(self):
-        return "Precision@{}".format(self.topk)
-
-    def __call__(self, scores, ground_truth):
-        is_hit = get_is_hit(scores, ground_truth, self.topk)
-        is_hit = is_hit.sum(dim=1)
-        num_pos = ground_truth.sum(dim=1)
-        self._cnt += scores.shape[0] - (num_pos == 0).sum().item()
-        self._sum += (is_hit/(self.topk+self.epison)).sum().item()
-
-
 class NDCG(_Metric):
     '''
     NDCG in top-k samples
@@ -132,7 +111,7 @@ class NDCG(_Metric):
         is_hit = get_is_hit(scores, ground_truth, self.topk)
         num_pos = ground_truth.sum(dim=1).clamp(0, self.topk).to(torch.long).to('cpu')
         dcg = self.DCG(is_hit, device)
-        idcg = self.IDCGs[num_pos].to('cpu')
+        idcg = self.IDCGs[num_pos]
         ndcg = dcg/idcg.to(device)
         self._cnt += scores.shape[0] - (num_pos == 0).sum().item()
         self._sum += ndcg.sum().item()

@@ -38,9 +38,9 @@ def main():
     bi_graph = assist_data.ground_truth_b_i
 
     # metric
-    metrics = [Recall(1),NDCG(1),Recall(3),NDCG(3),Recall(5),NDCG(5),Recall(10),NDCG(10),Recall(20), NDCG(20)]
-    TARGET = 'NDCG@1'
-      
+    metrics = [Recall(10), Recall(20), NDCG(10), NDCG(20), Recall(40), NDCG(40), Recall(80), NDCG(80)]
+    TARGET = 'Recall@20'
+
     # log
     log = logger.Logger(os.path.join(
         CONFIG['log'], CONFIG['dataset_name'], 
@@ -67,7 +67,7 @@ def main():
             assert model.__class__.__name__ == CONFIG['model']
 
             model.load_state_dict(torch.load(
-                os.path.join(DIR, dd['hash']+"_NDCG@1.pth")))
+                os.path.join(DIR, dd['hash']+"_Recall@20.pth")))
 
             # log
             log.update_modelinfo(info, {'lr': dd['lr']}, metrics)
