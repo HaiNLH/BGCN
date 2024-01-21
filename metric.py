@@ -78,6 +78,25 @@ class Recall(_Metric):
         num_pos = ground_truth.sum(dim=1)
         self._cnt += scores.shape[0] - (num_pos == 0).sum().item()
         self._sum += (is_hit/(num_pos+self.epison)).sum().item()
+class Precision(_Metric):
+    '''
+    Precision in top-k samples
+    '''
+
+    def __init__(self, topk):
+        super().__init__()
+        self.topk = topk
+        self.epison = 1e-8
+
+    def get_title(self):
+        return "Precision@{}".format(self.topk)
+
+    def __call__(self, scores, ground_truth):
+        device = scores.device
+        is_hit = get_is_hit(scores, ground_truth, self.topk)
+        is_hit = is_hit.sum(dim=1)
+        self._cnt += scores.shape[0]
+        self._sum += (is_hit/self.topk).sum().item()
 
 class NDCG(_Metric):
     '''
